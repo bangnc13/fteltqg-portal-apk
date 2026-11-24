@@ -1,0 +1,1 @@
+# fteltqg-portal-apk
