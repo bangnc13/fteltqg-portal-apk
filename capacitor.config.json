@@ -1,0 +1,18 @@
+{
+  "appId": "com.fteltqg.portal",
+  "appName": "FTEL TQG",
+  "webDir": "www",
+  "server": {
+    "url": "https://www.fteltqg.com",
+    "cleartext": true,
+    "allowNavigation": [
+      "www.fteltqg.com",
+      "fteltqg.com",
+      "script.google.com",
+      "*.googleusercontent.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
