@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Zalo Bot Nhắc Lịch Google Sheet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+  --fg: #f8fafc;
+  --fg-muted: #94a3b8;
+  --accent: #0ea5e9;
+  --accent-glow: rgba(14, 165, 233, 0.2);
+  --success: #10b981;
+  --border: #334155;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-hover: #f1f5f9;
+    --fg: #0f172a;
+    --fg-muted: #64748b;
+    --accent: #0284c7;
+    --accent-glow: rgba(2, 132, 199, 0.15);
+    --success: #059669;
+    --border: #e2e8f0;
+    color-scheme: light;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+  --fg: #f8fafc;
+  --fg-muted: #94a3b8;
+  --accent: #0ea5e9;
+  --accent-glow: rgba(14, 165, 233, 0.2);
+  --success: #10b981;
+  --border: #334155;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin: 0;
+  padding: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 2rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+header p {
+  color: var(--fg-muted);
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media(max-width: 768px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.card h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flow-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.flow-step:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.step-num {
+  background: var(--accent-glow);
+  color: var(--accent);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.step-content h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.step-content p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+pre {
+  background: var(--bg);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Zalo Bot Nhắc Lịch Google Sheet</h1>
+    <p>Kiến trúc tự động hóa thông báo lịch làm việc qua Zalo OA kết hợp Google Apps Script</p>
+    <div style="margin-top: 1rem;">
+      <span class="status-badge"><span class="dot"></span>Hệ thống sẵn sàng triển khai</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- Cột 1: Luồng hoạt động -->
+    <div class="card">
+      <h2>🔄 Luồng Vận Hành (Archify Flow)</h2>
+
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Nhập liệu Google Sheet</h3>
+          <p>Nhân sự nhập lịch công tác, thời gian, nội dung và số điện thoại/Zalo ID nhận thông báo vào Sheet.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Trigger Apps Script định kỳ</h3>
+          <p>Hàm <code>Time-driven Trigger</code> chạy mỗi giờ/ngày để quét các lịch sắp diễn ra cần nhắc nhở.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Gọi Zalo OA API</h3>
+          <p>Apps Script đóng gói dữ liệu và gửi yêu cầu POST đến <code>openapi.zalo.me/v2.0/oa/message</code>.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Gửi tin nhắn cho nhân viên</h3>
+          <p>Nhân viên nhận được tin nhắn ZNS hoặc tin nhắn chat trực tiếp từ Zalo Official Account của công ty.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột 2: Cấu trúc Code Apps Script -->
+    <div class="card">
+      <h2>💻 Mã nguồn Apps Script Mẫu</h2>
+      <p style="color: var(--fg-muted); font-size: 0.9rem; margin-bottom: 1rem;">Đoạn code cốt lõi xử lý việc quét Google Sheet và gọi API Zalo:</p>
+
+      <pre><code>function sendZaloReminders() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet()
+                            .getSheetByName("Lich");
+  var rows = sheet.getDataRange().getValues();
+
+  // Lấy Access Token của Zalo OA
+  var token = "ZALO_OA_ACCESS_TOKEN_HERE";
+
+  for (var i = 1; i < rows.length; i++) {
+    var row = rows[i];
+    var trangThai = row[3]; // Cột trạng thái
+
+    if (trangThai == "Chưa gửi") {
+      var zaloId = row[1];
+      var noiDung = row[2];
+
+      var payload = {
+        "recipient": { "user_id": zaloId },
+        "message": { "text": "🔔 Nhắc lịch: " + noiDung }
+      };
+
+      var options = {
+        "method": "post",
+        "contentType": "application/json",
+        "headers": { "access_token": token },
+        "payload": JSON.stringify(payload)
+      };
+
+      UrlFetchApp.fetch(
+        "https://openapi.zalo.me/v2.0/oa/message",
+        options
+      );
+
+      sheet.getRange(i + 1, 4).setValue("Đã gửi");
+    }
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Cột dưới: Hướng dẫn cấu hình -->
+  <div class="card">
+    <h2>⚙️ Hướng dẫn cài đặt nhanh</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+      <div style="background: var(--bg); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+        <strong style="color: var(--accent);">Bước 1: Tạo Zalo OA</strong>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--fg-muted);">Đăng ký tài khoản Zalo Official Account, xác thực doanh nghiệp và lấy <code>Access Token</code>.</p>
+      </div>
+      <div style="background: var(--bg); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+        <strong style="color: var(--accent);">Bước 2: Thiết lập Google Sheet</strong>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--fg-muted);">Tạo các cột: Tên nhân viên, Zalo User ID, Nội dung lịch, Trạng thái.</p>
+      </div>
+      <div style="background: var(--bg); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+        <strong style="color: var(--accent);">Bước 3: Cài đặt Trigger</strong>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--fg-muted);">Vào Extensions > Apps Script, dán code mẫu và thiết lập hẹn giờ chạy tự động (Time-driven).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
